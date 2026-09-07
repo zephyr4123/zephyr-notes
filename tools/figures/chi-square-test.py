@@ -24,11 +24,12 @@ ax.bar([i + w / 2 for i in x], [exp_[k] for k in keys], w, color=C_GRAY, alpha=0
 for i, k in enumerate(keys):
     ax.text(i - w / 2, obs[k] + 3, f"{obs[k]}", ha="center", fontsize=10)
     ax.text(i + w / 2, exp_[k] + 3, f"{exp_[k]:.1f}", ha="center", fontsize=10, color="#555")
-    ax.text(i, -22, f"(O−E)²/E = {contrib[k]:.2f}", ha="center", fontsize=9.5, color=C_HI)
+    ax.text(i, -14, f"O−E = {obs[k] - exp_[k]:+.2f}", ha="center", fontsize=9.5, color="#333")
+    ax.text(i, -27, f"(O−E)²/E = {contrib[k]:.2f}", ha="center", fontsize=9.5, color=C_HI)
 ax.set_xticks(list(x), [f"{a} · {b}" for a, b in keys])
-ax.set_ylim(-30, 230)
+ax.set_ylim(-36, 230)
 ax.set_ylabel("提交数")
-ax.set_title(f"Artora 表：每个格子的观测值 vs 独立假设下的期望值，χ² = Σ(O−E)²/E = {chi2:.2f}")
+ax.set_title(f"Artora 表：四个格子的偏离量大小相同（只有 1 个自由度），χ² = Σ(O−E)²/E = {chi2:.2f}")
 ax.legend(loc="upper right")
 ax.axhline(0, color="black", lw=0.8)
 save_jpeg(fig, "chi-square-test", "observed-expected")
@@ -61,3 +62,28 @@ ax1.set_ylabel("概率")
 fig.suptitle("卡方检验靠的是「格子人数 ≈ 正态」这个近似：期望大时套得上，期望小时套不上", y=1.02)
 save_jpeg(fig, "chi-square-test", "approximation")
 print(f"chi2={chi2:.3f}", {f"{k[0]}·{k[1]}": round(v, 3) for k, v in contrib.items()})
+
+
+# ---- 图 3：同一个 p 的两种看法：N(0,1) 的双尾 = χ²(1) 的单尾 ----
+from math import erfc, exp as _exp, gamma  # noqa: E402
+z_obs = sqrt(chi2)
+p_obs = erfc(z_obs / sqrt(2))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4.2))
+xs = [-4 + i * 8 / 400 for i in range(401)]
+phi = [_exp(-v * v / 2) / sqrt(2 * pi) for v in xs]
+ax1.plot(xs, phi, color=C_A, lw=2)
+ax1.fill_between([v for v in xs if v >= z_obs], [_exp(-v * v / 2) / sqrt(2 * pi) for v in xs if v >= z_obs], color=C_HI, alpha=0.5)
+ax1.fill_between([v for v in xs if v <= -z_obs], [_exp(-v * v / 2) / sqrt(2 * pi) for v in xs if v <= -z_obs], color=C_HI, alpha=0.5)
+ax1.axvline(z_obs, color=C_HI, ls="--", lw=1); ax1.axvline(-z_obs, color=C_HI, ls="--", lw=1)
+ax1.set_title(f"标准正态：|Z| ≥ {z_obs:.2f} 的两尾面积 = {p_obs:.4f}")
+ax1.set_xlabel("z"); ax1.set_ylabel("密度")
+cs = [0.05 + i * 10 / 400 for i in range(401)]
+chi_pdf = lambda v: v ** (-0.5) * _exp(-v / 2) / (sqrt(2) * gamma(0.5))
+ax2.plot(cs, [chi_pdf(v) for v in cs], color=C_A, lw=2)
+ax2.fill_between([v for v in cs if v >= chi2], [chi_pdf(v) for v in cs if v >= chi2], color=C_HI, alpha=0.5)
+ax2.axvline(chi2, color=C_HI, ls="--", lw=1)
+ax2.set_ylim(0, 1.2)
+ax2.set_title(f"χ²(1)：X ≥ {chi2:.2f} 的单尾面积 = {p_obs:.4f}")
+ax2.set_xlabel("χ² = z²")
+fig.suptitle("同一件事的两种画法：Z² 服从 χ²(1)，所以正态的双尾 = 卡方的单尾", y=1.02)
+save_jpeg(fig, "chi-square-test", "tail")

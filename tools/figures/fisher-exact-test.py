@@ -87,3 +87,21 @@ ax.set_ylabel("p 值")
 ax.set_title("同样的满意率差（60.3% vs 69.0%），三种检验的 p 随样本量怎么变")
 ax.legend(loc="upper right")
 save_jpeg(fig, "fisher-exact-test", "vs-chi2")
+
+# ---- 图 3：玩具表 [[3,1],[1,3]]：n=8 时分布只有 5 根柱，双侧 p 只能取 3 个值 ----
+toy = hyper_pmf(4, 4, 8)
+fig, ax = plt.subplots(figsize=(8, 4.2))
+labels = {0: "2/70", 1: "34/70", 2: "1", 3: "34/70", 4: "2/70"}
+for x, pr in toy.items():
+    ax.bar(x, pr, width=0.7, color=C_HI if x in (0, 4) else C_A, alpha=0.9 if x in (0, 4) else 0.6)
+    ax.text(x, pr + 0.012, f"P={round(pr * 70)}/70", ha="center", fontsize=10)
+    ax.text(x, -0.06, f"双侧 p = {labels[x]}", ha="center", fontsize=9.5, color=C_HI if x in (0, 4) else "#444")
+ax.axhline(0, color="black", lw=0.8)
+ax.set_ylim(-0.1, 0.6)
+ax.set_xticks(range(5))
+ax.set_xlabel("组 1 的成功数 a")
+ax.set_ylabel("H0 下的概率")
+ax.set_title("n = 8、r1 = c1 = 4 时的超几何分布：只有 5 种可能的表，p 值只能取 3 个值")
+ax.text(0.02, 0.95, "只有 a = 0 或 4 才能 p < 0.05\n真实第一类错误率 = 2/70 ≈ 2.9%，不是 5%",
+        transform=ax.transAxes, ha="left", va="top", fontsize=10, bbox=dict(boxstyle="round", fc="white", ec=C_HI))
+save_jpeg(fig, "fisher-exact-test", "toy-pmf")
