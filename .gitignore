@@ -1,0 +1,67 @@
+# ---- Claude Code / agent 本机私有文件（符号链接与会话配置，绝不进库）----
+.claude/
+CLAUDE.local.md
+AGENTS.md
+.codex/
+.ae/
+
+# ---- macOS ----
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+
+# ---- 编辑器 / IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+
+# ---- 密钥与环境配置 ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+secrets/
+credentials.json
+
+# ---- 日志与临时文件 ----
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
+
+# ---- Node ----
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+.cache/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- 知识库工具本机状态（Obsidian 等）----
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+.trash/
