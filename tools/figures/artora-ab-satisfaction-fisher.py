@@ -56,3 +56,36 @@ ax2.text(0.98, 0.04, "区间不含 0 ⇔ 双侧检验在 α=0.05 下显著\nFish
 fig.suptitle("Artora 识别满意度 A/B · 09-08 00:00 读数", y=1.02)
 save_jpeg(fig, "artora-ab-satisfaction-fisher", "ci")
 print(f"Δ={d*100:.2f}pp  Newcombe CI=[{lo*100:.2f}, {hi*100:.2f}]  Wilson a=[{la*100:.2f},{ua*100:.2f}] b=[{lb*100:.2f},{ub*100:.2f}]")
+
+# ---- 图 2：如果重来，样本量该定多少：两比例检验的正态近似公式，基线 60.26%，α=0.05 双侧，功效 80% ----
+from math import ceil  # noqa: E402
+Z_A, Z_B = 1.959964, 0.841621   # α/2 = 0.025 与功效 0.8 对应的正态分位数
+base = A_S / A_N
+deltas = [d_ / 1000 for d_ in range(20, 151)]      # 2pp ~ 15pp
+
+
+def n_per_arm(p0, delta, za=Z_A, zb=Z_B):
+    p1 = p0 + delta
+    return (za * sqrt(2 * (p0 + p1) / 2 * (1 - (p0 + p1) / 2)) + zb * sqrt(p0 * (1 - p0) + p1 * (1 - p1))) ** 2 / delta ** 2
+
+
+ns = [n_per_arm(base, d_) for d_ in deltas]
+fig, ax = plt.subplots(figsize=(8.5, 4.4))
+ax.plot([d_ * 100 for d_ in deltas], ns, color=C_A, lw=2)
+obs_d = B_S / B_N - A_S / A_N
+n_obs = n_per_arm(base, obs_d)
+ax.axvline(obs_d * 100, color=C_HI, ls="--", lw=1)
+ax.axhline(n_obs, color=C_HI, ls="--", lw=1)
+ax.plot([obs_d * 100], [n_obs], "o", color=C_HI, ms=7)
+ax.annotate(f"本次观测到的差 {obs_d*100:.2f}pp\n→ 每组约 {ceil(n_obs)} 人才有 80% 功效",
+            xy=(obs_d * 100, n_obs), xytext=(obs_d * 100 + 1.2, n_obs + 900),
+            arrowprops=dict(arrowstyle="->", color=C_HI), color=C_HI, fontsize=10)
+ax.axhline(A_N, color=C_GRAY, ls=":", lw=1)
+ax.text(14.8, A_N + 60, f"09-08 读数时对照组 n = {A_N}", ha="right", color=C_GRAY, fontsize=9.5)
+ax.set_yscale("log")
+ax.set_ylim(80, 20000)
+ax.set_xlabel("要检出的真实满意率差 Δ（百分点），基线 60.26%")
+ax.set_ylabel("每组需要的提交数（对数轴）")
+ax.set_title("检出多大的差，需要多少样本（α = 0.05 双侧，功效 80%）")
+save_jpeg(fig, "artora-ab-satisfaction-fisher", "sample-size")
+print(f"n per arm to detect {obs_d*100:.2f}pp at 80% power: {n_obs:.1f}; for 5pp: {n_per_arm(base, 0.05):.0f}; for 3pp: {n_per_arm(base, 0.03):.0f}")
