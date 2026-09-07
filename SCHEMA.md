@@ -115,6 +115,26 @@ key:                    # 块列表
 
 每种类型有**必须出现的二级标题**（`schema.json` 的 `required_headings`），模板已带。为的是同类笔记长得一样，人好扫、机器好切 chunk。标题之外可以随意加节。
 
+### 8.1 数学公式（lint 会查）
+
+渲染器（GitHub、Obsidian）对公式写法很挑剔，错一点就整段不渲染。规则：
+
+- **只用两种定界符**：行内 `$...$`；独立公式 `$$` 单独占一行，前后各空一行，块内不能有空行。不用 `\(` `\[`。
+- **凡是数学都进 `$`**：变量、下标、比较、希腊字母。正文里不裸写 χ ² ≥ ≤ ≈ × − Σ α Δ 这类 Unicode 符号，一律 `\chi^2` `\ge` `\le` `\approx` `\times` `-` `\sum` `\alpha` `\Delta`。
+- **`$` 内侧紧贴内容**：`$p = 0.03$` 对，`$ p = 0.03 $` 错，GitHub 不渲染后者。
+- **标题、链接文字、图片 alt 里不放公式**；frontmatter 不渲染公式，`title` / `summary` 用文字描述。
+- 表格单元格可以放行内公式，但公式里别出现 `|`。
+- 要打美元符号写 `\$`。
+- 分数 `\frac`、二项式 `\binom`、公式里的文字 `\text{obs}`、多行对齐 `\begin{aligned}...\end{aligned}`。
+
+```markdown
+在 $H_0$ 下，$p = P\big(\chi^2_{(1)} \ge \chi^2_{\text{obs}}\big)$。
+
+$$
+\chi^2=\sum_{i,j}\frac{(O_{ij}-E_{ij})^2}{E_{ij}}
+$$
+```
+
 ## 9. 加一个新类型的流程
 
 1. `schema.json` 的 `types` 里加一项：`dir`、`fields`、`required_headings`

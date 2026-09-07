@@ -343,6 +343,61 @@ class TestBody(VaultCase):
         self.assertTrue(any("big.jpg" in w and "偏大" in w for w in rep.warnings), rep.warnings)
 
 
+class TestMath(VaultCase):
+    def body(self, extra):
+        self.valid_vault()
+        self.write("notes/concept/fisher-exact-test.md", CONCEPT + "\n" + extra + "\n")
+        return self.run_lint()
+
+    def test_unicode_math_in_prose_rejected(self):
+        self.assert_error(self.body("统计量 χ² ≥ 5 才行。"), "数学符号要写成 LaTeX")
+
+    def test_latex_inline_ok(self):
+        rep = self.body("统计量 $\\chi^2 \\ge 5$ 才行，$2\\times 2$ 表。")
+        self.assertTrue(rep.ok, rep.errors)
+
+    def test_unicode_inside_math_or_code_ignored(self):
+        rep = self.body("公式 $χ^2$ 和代码 `χ²` 都不管。")
+        self.assertTrue(rep.ok, rep.errors)
+
+    def test_unpaired_dollar(self):
+        self.assert_error(self.body("只有一个 $ 符号。"), "不配对")
+
+    def test_escaped_dollar_ok(self):
+        self.assertTrue(self.body("价格 \\$5。").ok)
+
+    def test_space_inside_inline_math(self):
+        self.assert_error(self.body("写成 $ p = 0.03 $ 不行。"), "内侧不能有空格")
+
+    def test_double_dollar_inline_rejected(self):
+        self.assert_error(self.body("行内 $$x$$ 不行。"), "单独占一行")
+
+    def test_block_needs_blank_lines(self):
+        self.assert_error(self.body("前一行\n$$\nx=1\n$$\n后一行"), "前面要空一行")
+        self.assert_error(self.body("\n$$\nx=1\n$$\n后一行"), "后面要空一行")
+
+    def test_block_no_blank_inside(self):
+        self.assert_error(self.body("\n$$\nx=1\n\ny=2\n$$\n"), "不能有空行")
+
+    def test_block_unclosed(self):
+        self.assert_error(self.body("\n$$\nx=1\n"), "没有闭合")
+
+    def test_block_ok(self):
+        rep = self.body("\n$$\nP(A=a)=\\frac{\\binom{r_1}{a}}{\\binom{n}{c_1}}\n$$\n")
+        self.assertTrue(rep.ok, rep.errors)
+
+    def test_bad_delimiters(self):
+        self.assert_error(self.body("用 \\(x\\) 不行。"), "定界符")
+
+    def test_math_in_heading_rejected(self):
+        self.assert_error(self.body("## 关于 $x$ 的一节"), "标题里不放公式")
+
+    def test_map_arrow_annotation_ok(self):
+        self.valid_vault()
+        self.write("maps/math-in-biz.md", MAP + "- [x](../notes/concept/fisher-exact-test.md) ← 先看这个\n")
+        self.assertTrue(self.run_lint().ok)
+
+
 class TestMaps(VaultCase):
     def test_map_prose_line_rejected(self):
         self.valid_vault()

@@ -29,6 +29,15 @@ PLACEHOLDER = re.compile(r"\{\{[a-z_]+\}\}")
 FENCE = re.compile(r"^(```|~~~)")
 HEADING2 = re.compile(r"^##\s+(.*?)\s*$")
 EXTERNAL = ("http://", "https://", "mailto:", "tel:")
+LATEX_BAD_DELIM = re.compile(r"\\[\(\[]")
+INLINE_MATH = re.compile(r"\$([^$]*)\$")
+# 正文里不许裸写的数学符号 → 该写的 LaTeX
+MATH_UNICODE = {
+    "χ": r"\chi", "²": "^2", "³": "^3", "≥": r"\ge", "≤": r"\le", "≠": r"\ne", "≈": r"\approx",
+    "±": r"\pm", "×": r"\times", "−": "-", "√": r"\sqrt{}", "Σ": r"\sum", "∑": r"\sum", "∞": r"\infty",
+    "α": r"\alpha", "β": r"\beta", "γ": r"\gamma", "δ": r"\delta", "ε": r"\varepsilon", "θ": r"\theta",
+    "λ": r"\lambda", "μ": r"\mu", "π": r"\pi", "σ": r"\sigma", "Δ": r"\Delta", "Φ": r"\Phi",
+}
 EXEMPT_FILES = {"README.md"}
 
 
@@ -42,10 +51,10 @@ def split_frontmatter(text: str):
     """返回 (frontmatter 文本, 正文文本)。没有 frontmatter 时前者为 None。"""
     lines = text.split("\n")
     if not lines or lines[0].strip() != FM_DELIM:
-        return None, text
+        return None, text, 0
     for i in range(1, len(lines)):
         if lines[i].strip() == FM_DELIM:
-            return "\n".join(lines[1:i]), "\n".join(lines[i + 1:])
+            return "\n".join(lines[1:i]), "\n".join(lines[i + 1:]), i + 1
     raise LintError("frontmatter 没有闭合的 ---")
 
 
@@ -100,12 +109,13 @@ def parse_date(s: str):
 # ---------------------------------------------------------------- model
 
 class Note:
-    def __init__(self, path: Path, rel: str, type_name: str, fm: dict, body: str):
+    def __init__(self, path: Path, rel: str, type_name: str, fm: dict, body: str, body_offset: int = 0):
         self.path = path
         self.rel = rel
         self.type = type_name
         self.fm = fm
         self.body = body
+        self.body_offset = body_offset   # 正文第 1 行在文件里是第 body_offset+1 行
         self.id = fm.get("id") if isinstance(fm.get("id"), str) else None
         self.links: set = set()      # 指向的其他笔记/索引页 id
         self.refs: list = []         # (字段名, 字段规格, 值列表)，延后解析
@@ -227,7 +237,7 @@ def collect_notes(root: Path, schema: dict, rep: Report) -> list:
                 rep.error(r, "不是 UTF-8 文本")
                 continue
             try:
-                fm_text, body = split_frontmatter(text)
+                fm_text, body, offset = split_frontmatter(text)
                 if fm_text is None:
                     rep.error(r, "缺少 frontmatter（文件必须以 --- 开头）")
                     continue
@@ -235,7 +245,7 @@ def collect_notes(root: Path, schema: dict, rep: Report) -> list:
             except LintError as e:
                 rep.error(r, str(e))
                 continue
-            notes.append(Note(p, r, type_name, fm, body))
+            notes.append(Note(p, r, type_name, fm, body, offset))
     return notes
 
 
@@ -344,6 +354,53 @@ def check_refs(notes: list, by_id: dict, rep: Report):
                 n.links.add(v)
 
 
+def check_math(note: Note, lines: list, rep: Report):
+    """公式规范：行内 $...$；公式块 $$ 独占一行、前后空行、块内无空行；不用 \\( \\[；正文不裸写数学符号；标题不放公式。"""
+    in_block = False
+    for i, line in enumerate(lines):
+        s, lineno = line.strip(), i + 1 + note.body_offset
+        if s == "$$":
+            if not in_block:
+                if i > 0 and lines[i - 1].strip():
+                    rep.error(note.rel, f"第 {lineno} 行：公式块 $$ 前面要空一行")
+                in_block = True
+            else:
+                if i + 1 < len(lines) and lines[i + 1].strip():
+                    rep.error(note.rel, f"第 {lineno} 行：公式块 $$ 后面要空一行")
+                in_block = False
+            continue
+        if in_block:
+            if not s:
+                rep.error(note.rel, f"第 {lineno} 行：公式块里不能有空行（GitHub 会断开渲染）")
+            continue
+        if "$$" in line:
+            rep.error(note.rel, f"第 {lineno} 行：$$ 要单独占一行做公式块；行内公式用单个 $")
+            continue
+        text = line.replace("\\$", "")
+        if LATEX_BAD_DELIM.search(text):
+            rep.error(note.rel, f"第 {lineno} 行：不用 \\( \\[ 定界符，行内用 $，公式块用 $$")
+        if text.count("$") % 2:
+            rep.error(note.rel, f"第 {lineno} 行：行内公式 $ 不配对（要打美元符号写 \\$）")
+            continue
+        if s.startswith("#") and "$" in text:
+            rep.error(note.rel, f"第 {lineno} 行：标题里不放公式")
+        for m in INLINE_MATH.finditer(text):
+            inner = m.group(1)
+            if not inner.strip():
+                rep.error(note.rel, f"第 {lineno} 行：空公式 $$")
+            elif inner != inner.strip():
+                rep.error(note.rel, f"第 {lineno} 行：$ 内侧不能有空格（GitHub 不渲染）：${inner}$")
+        if s.startswith("#"):
+            continue  # 标题是纯文字，「业务 × 原理」这种排版用法不算数学
+        prose = MD_LINK.sub("", INLINE_MATH.sub("", text))  # 链接文字 / alt 是纯文字，不查
+        bad = [(ch, MATH_UNICODE[ch]) for ch in dict.fromkeys(prose) if ch in MATH_UNICODE]
+        if bad:
+            hint = "、".join(f"{c} → {t}" for c, t in bad)
+            rep.error(note.rel, f"第 {lineno} 行：数学符号要写成 LaTeX 放进 $...$：{hint}")
+    if in_block:
+        rep.error(note.rel, "公式块 $$ 没有闭合")
+
+
 def check_body(note: Note, root: Path, schema: dict, by_path: dict, rep: Report, assets_used: set):
     spec = schema["types"][note.type]
     lines = strip_code(note.body)
@@ -351,12 +408,13 @@ def check_body(note: Note, root: Path, schema: dict, by_path: dict, rep: Report,
     headings = []
     note_link_lines: set = set()
 
+    check_math(note, lines, rep)
     if PLACEHOLDER.search(note.body):
         rep.error(note.rel, "残留模板占位符 {{...}}，没填完")
     if WIKI_LINK.search("\n".join(lines)):
         rep.error(note.rel, "不允许 [[wikilink]]，用标准 markdown 相对路径：[标题](../concept/<id>.md)")
 
-    for lineno, line in enumerate(lines, 1):
+    for lineno, line in enumerate(lines, 1 + note.body_offset):
         hm = HEADING2.match(line)
         if hm:
             headings.append(hm.group(1))
@@ -388,7 +446,7 @@ def check_body(note: Note, root: Path, schema: dict, by_path: dict, rep: Report,
             rep.error(note.rel, f"缺少必需的二级标题 `## {h}`（模板里有，别删）")
 
     if spec.get("body") == "links-only":
-        for lineno, line in enumerate(lines, 1):
+        for lineno, line in enumerate(lines, 1 + note.body_offset):
             s = line.strip()
             if not s or s.startswith("#"):
                 continue
