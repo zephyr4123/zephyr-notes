@@ -413,15 +413,39 @@ def check_reachability(notes: list, by_id: dict, schema: dict, rep: Report):
             rep.error(n.rel, "孤儿：没有任何索引页能沿链接到达它。加进某个 maps/*.md，或让已收录的笔记链向它")
 
 
-def check_assets(root: Path, assets_used: set, rep: Report):
+def check_assets(root: Path, schema: dict, assets_used: set, by_id: dict, rep: Report):
     d = root / "assets"
     if not d.exists():
         return
+    for child in sorted(d.iterdir()):
+        if child.name in EXEMPT_FILES or child.name.startswith("."):
+            continue
+        r = rel_of(root, child)
+        if child.is_file():
+            rep.error(r, "assets/ 根下不放文件；按笔记建子目录 assets/<note-id>/")
+        elif child.name not in by_id:
+            rep.error(r, f"assets/ 子目录名 `{child.name}` 不是任何笔记的 id；目录名必须等于它服务的笔记 id")
+    policy = schema.get("assets", {})
+    allowed = set(policy.get("allowed_ext", []))
+    forbidden = set(policy.get("forbidden_ext", []))
+    warn_bytes = policy.get("warn_bytes")
+    max_bytes = policy.get("max_bytes")
     for p in sorted(d.rglob("*")):
         if p.is_dir() or p.name in EXEMPT_FILES or p.name.startswith("."):
             continue
+        r = rel_of(root, p)
+        ext = p.suffix.lower()
+        if ext in forbidden:
+            rep.error(r, f"不允许 {ext} 附件；位图压成 JPEG（用 tools/figures/_style.py 的 save_jpeg）")
+        elif allowed and ext not in allowed:
+            rep.error(r, f"附件后缀 {ext} 不在 schema.json 的 allowed_ext 里")
+        size = p.stat().st_size
+        if max_bytes and size > max_bytes:
+            rep.error(r, f"附件 {size // 1024} KB 超过上限 {max_bytes // 1024} KB；压小或外链")
+        elif warn_bytes and size > warn_bytes:
+            rep.warn(r, f"附件 {size // 1024} KB 偏大（> {warn_bytes // 1024} KB），考虑压小")
         if p.resolve() not in assets_used:
-            rep.warn(rel_of(root, p), "没有任何笔记引用这个附件")
+            rep.warn(r, "没有任何笔记引用这个附件")
 
 
 def count_inbox(root: Path) -> int:
@@ -450,7 +474,7 @@ def run(root: Path) -> Report:
     for n in notes:
         check_body(n, root, schema, by_path, rep, assets_used)
     check_reachability(notes, by_id, schema, rep)
-    check_assets(root, assets_used, rep)
+    check_assets(root, schema, assets_used, by_id, rep)
 
     for t in schema["types"]:
         rep.stats[t] = sum(1 for n in notes if n.type == t)

@@ -304,13 +304,43 @@ class TestBody(VaultCase):
 
     def test_asset_referenced_and_orphan_asset_warns(self):
         self.valid_vault()
-        self.write("assets/fisher-exact-test-table.png", "x")
-        self.write("assets/unused.png", "x")
-        self.write("notes/concept/fisher-exact-test.md", CONCEPT + "\n![t](../../assets/fisher-exact-test-table.png)\n")
+        self.write("assets/fisher-exact-test/table.jpg", "x")
+        self.write("assets/fisher-exact-test/unused.jpg", "x")
+        self.write("notes/concept/fisher-exact-test.md", CONCEPT + "\n![t](../../assets/fisher-exact-test/table.jpg)\n")
         rep = self.run_lint()
         self.assertTrue(rep.ok, rep.errors)
         self.assertEqual(len(rep.warnings), 1)
-        self.assertIn("unused.png", rep.warnings[0])
+        self.assertIn("unused.jpg", rep.warnings[0])
+
+    def test_asset_file_at_root_rejected(self):
+        self.valid_vault()
+        self.write("assets/stray.jpg", "x")
+        self.assert_error(self.run_lint(), "assets/ 根下不放文件")
+
+    def test_asset_dir_must_match_note_id(self):
+        self.valid_vault()
+        self.write("assets/no-such-note/x.jpg", "x")
+        self.assert_error(self.run_lint(), "不是任何笔记的 id")
+
+    def test_png_asset_rejected(self):
+        self.valid_vault()
+        self.write("assets/fisher-exact-test/table.png", "x")
+        self.write("notes/concept/fisher-exact-test.md", CONCEPT + "\n![t](../../assets/fisher-exact-test/table.png)\n")
+        self.assert_error(self.run_lint(), "不允许 .png 附件")
+
+    def test_unknown_asset_ext_rejected(self):
+        self.valid_vault()
+        self.write("assets/fisher-exact-test/data.xlsx", "x")
+        self.assert_error(self.run_lint(), "不在 schema.json 的 allowed_ext")
+
+    def test_asset_size_warn_and_error(self):
+        self.valid_vault()
+        (self.tmp / "assets/fisher-exact-test").mkdir(exist_ok=True); (self.tmp / "assets/fisher-exact-test/big.jpg").write_bytes(b"x" * (400 * 1024))
+        (self.tmp / "assets/fisher-exact-test/huge.jpg").write_bytes(b"x" * (2 * 1024 * 1024))
+        self.write("notes/concept/fisher-exact-test.md", CONCEPT + "\n![a](../../assets/fisher-exact-test/big.jpg) ![b](../../assets/fisher-exact-test/huge.jpg)\n")
+        rep = self.run_lint()
+        self.assertTrue(any("huge.jpg" in e and "超过上限" in e for e in rep.errors), rep.errors)
+        self.assertTrue(any("big.jpg" in w and "偏大" in w for w in rep.warnings), rep.warnings)
 
 
 class TestMaps(VaultCase):

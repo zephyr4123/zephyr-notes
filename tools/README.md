@@ -58,3 +58,15 @@ python3 -m unittest discover -s tools -p 'test_*.py' -v
 - 加类型：见 `../SCHEMA.md` §9。lint 不用改；给 `test_lint.py` 加一个「该类型模板生成后能过」的用例。
 - 加检查项：在 `lint.py` 对应的 `check_*` 函数里加，同时加测试用例，README 表里加一行。
 - 以后可加：`backlinks.py` 生成反链报告、`export.py` 导出成 Chatbot 用的 JSONL、`review.py` 按 `last_reviewed` 拉待复习 qa。
+
+## figures/：出图
+
+笔记里的图都由 `tools/figures/<note-id>.py` 生成，可重跑，落到 `assets/<note-id>/<desc>.jpg`。依赖装在项目局部 venv：
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r tools/figures/requirements.txt
+.venv/bin/python tools/figures/fisher-exact-test.py     # 重出这篇的图
+make figures                                            # 重出全部
+```
+
+`_style.py` 统一字体（中文用 Hiragino Sans GB）、尺寸和 `save_jpeg()`：保存成 JPEG、质量 85、宽度上限 1600 px，白底。**不要直接 `plt.savefig("x.png")`**，lint 会拦 PNG 和超过大小上限的附件（上限在 `schema.json` 的 `assets` 段）。

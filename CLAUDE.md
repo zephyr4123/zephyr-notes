@@ -11,6 +11,9 @@
 5. **id 即文件名，永不改名。** 不复制别的笔记内容，用链接。
 6. **标签必须在 `tags.yml` 登记**，没有就先加一行再用。
 7. 拿不准类型就放 `inbox/`，不要硬归。
+8. **绝不编造。** 关于业务的每句话都要能在用户给的材料里找到依据；数学推算和对同一数据的补算可以，但要标明"补算"；猜测标"待验证"。用户的前提错了就如实写进复盘，不顺着说。
+9. **图文并茂。** 写 concept / case 时先想哪些数据能画成图（分布、观测 vs 期望、置信区间、方法对比），用 `.venv` 里的 matplotlib / scipy 按真实数据出图，直观的表也算。出图脚本放 `tools/figures/<note-id>.py`，可重跑。
+10. **图只存 JPEG。** 出图统一走 `tools/figures/_style.py` 的 `save_jpeg()`，落到 `assets/<note-id>/<desc>.jpg`（一篇一个子目录）。不放 PNG，附件超限 lint 会拦，仓库不能随 commit 越滚越大。
 
 ## 常用命令
 
@@ -19,6 +22,8 @@ python3 tools/new.py concept fisher-exact-test "Fisher 精确检验" --tags stat
 python3 tools/new.py map interview "面试准备"
 python3 tools/lint.py
 python3 -m unittest discover -s tools -p 'test_*.py'
+python3 -m venv .venv && .venv/bin/pip install -r tools/figures/requirements.txt   # 出图环境，一次
+.venv/bin/python tools/figures/<note-id>.py                                        # 重出某篇的图
 ```
 
 ## 协作方式

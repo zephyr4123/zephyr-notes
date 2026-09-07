@@ -1,0 +1,4 @@
+# 出图专用依赖；只在 .venv 里装，不进全局。tools/lint.py 与 tools/new.py 不依赖这里。
+matplotlib>=3.8
+numpy>=1.26
+scipy>=1.11

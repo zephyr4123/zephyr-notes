@@ -5,60 +5,196 @@
   "tag_pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
   "link_style": "markdown-relative",
   "common_fields": {
-    "id":      {"kind": "id",      "required": true},
-    "type":    {"kind": "type",    "required": true},
-    "title":   {"kind": "string",  "required": true},
-    "summary": {"kind": "string",  "required": true},
-    "tags":    {"kind": "tags",    "required": true, "min": 1},
-    "related": {"kind": "reflist", "required": false, "targets": ["*"]},
-    "status":  {"kind": "enum",    "required": true, "values": ["draft", "stable", "deprecated"]},
-    "created": {"kind": "date",    "required": true},
-    "updated": {"kind": "date",    "required": true}
+    "id": {
+      "kind": "id",
+      "required": true
+    },
+    "type": {
+      "kind": "type",
+      "required": true
+    },
+    "title": {
+      "kind": "string",
+      "required": true
+    },
+    "summary": {
+      "kind": "string",
+      "required": true
+    },
+    "tags": {
+      "kind": "tags",
+      "required": true,
+      "min": 1
+    },
+    "related": {
+      "kind": "reflist",
+      "required": false,
+      "targets": [
+        "*"
+      ]
+    },
+    "status": {
+      "kind": "enum",
+      "required": true,
+      "values": [
+        "draft",
+        "stable",
+        "deprecated"
+      ]
+    },
+    "created": {
+      "kind": "date",
+      "required": true
+    },
+    "updated": {
+      "kind": "date",
+      "required": true
+    }
   },
   "types": {
     "concept": {
       "dir": "notes/concept",
       "fields": {
-        "aliases": {"kind": "list", "required": false}
+        "aliases": {
+          "kind": "list",
+          "required": false
+        }
       },
-      "required_headings": ["解决什么问题", "原理", "适用边界"]
+      "required_headings": [
+        "解决什么问题",
+        "原理",
+        "适用边界"
+      ]
     },
     "case": {
       "dir": "notes/case",
       "fields": {
-        "uses": {"kind": "reflist", "required": true, "min": 1, "targets": ["concept", "pattern"]}
+        "uses": {
+          "kind": "reflist",
+          "required": true,
+          "min": 1,
+          "targets": [
+            "concept",
+            "pattern"
+          ]
+        }
       },
-      "required_headings": ["背景", "为什么用它", "怎么做的", "结果与复盘"]
+      "required_headings": [
+        "背景",
+        "为什么用它",
+        "怎么做的",
+        "结果与复盘"
+      ]
     },
     "problem": {
       "dir": "notes/problem",
       "fields": {
-        "platform":   {"kind": "enum",    "required": true,  "values": ["leetcode", "codeforces", "nowcoder", "other"]},
-        "number":     {"kind": "string",  "required": false},
-        "difficulty": {"kind": "enum",    "required": true,  "values": ["easy", "medium", "hard"]},
-        "url":        {"kind": "string",  "required": false},
-        "patterns":   {"kind": "reflist", "required": false, "targets": ["pattern"]}
+        "platform": {
+          "kind": "enum",
+          "required": true,
+          "values": [
+            "leetcode",
+            "codeforces",
+            "nowcoder",
+            "other"
+          ]
+        },
+        "number": {
+          "kind": "string",
+          "required": false
+        },
+        "difficulty": {
+          "kind": "enum",
+          "required": true,
+          "values": [
+            "easy",
+            "medium",
+            "hard"
+          ]
+        },
+        "url": {
+          "kind": "string",
+          "required": false
+        },
+        "patterns": {
+          "kind": "reflist",
+          "required": false,
+          "targets": [
+            "pattern"
+          ]
+        }
       },
-      "required_headings": ["题意", "思路", "代码", "复杂度"]
+      "required_headings": [
+        "题意",
+        "思路",
+        "代码",
+        "复杂度"
+      ]
     },
     "qa": {
       "dir": "notes/qa",
       "fields": {
-        "difficulty":    {"kind": "enum", "required": false, "values": ["easy", "medium", "hard"]},
-        "last_reviewed": {"kind": "date", "required": false}
+        "difficulty": {
+          "kind": "enum",
+          "required": false,
+          "values": [
+            "easy",
+            "medium",
+            "hard"
+          ]
+        },
+        "last_reviewed": {
+          "kind": "date",
+          "required": false
+        }
       },
-      "required_headings": ["一句话回答", "展开"]
+      "required_headings": [
+        "一句话回答",
+        "展开"
+      ]
     },
     "pattern": {
       "dir": "notes/pattern",
       "fields": {},
-      "required_headings": ["识别信号", "模板", "例子"]
+      "required_headings": [
+        "识别信号",
+        "模板",
+        "例子"
+      ]
     },
     "map": {
       "dir": "maps",
-      "skip_common": ["tags", "status", "created", "related"],
+      "skip_common": [
+        "tags",
+        "status",
+        "created",
+        "related"
+      ],
       "fields": {},
       "body": "links-only"
     }
+  },
+  "assets": {
+    "$comment": "附件策略：位图只允许 JPEG（仓库体积），矢量 svg 可以；大小超 warn_bytes 警告、超 max_bytes 报错。",
+    "allowed_ext": [
+      ".jpg",
+      ".jpeg",
+      ".svg",
+      ".webp",
+      ".pdf",
+      ".csv",
+      ".json",
+      ".txt",
+      ".md"
+    ],
+    "forbidden_ext": [
+      ".png",
+      ".bmp",
+      ".tiff",
+      ".tif",
+      ".gif"
+    ],
+    "warn_bytes": 307200,
+    "max_bytes": 1048576
   }
 }
