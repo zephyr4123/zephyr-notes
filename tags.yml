@@ -1,0 +1,40 @@
+# 标签受控词表。key = 标签（kebab-case），value = 一句说明。
+# 加标签：在这里加一行；lint 会拦住没登记的标签，防止 ml / machine-learning 这种漂移。
+# 标签是「横切」维度（一篇笔记可以有多个），不是分类；分类去 maps/ 建索引页。
+
+# —— 数学 / 理论 ——
+statistics: 统计学
+probability: 概率论
+hypothesis-testing: 假设检验
+linear-algebra: 线性代数
+optimization: 最优化
+information-theory: 信息论
+
+# —— 数据 / AI ——
+ml: 机器学习
+nlp: 自然语言处理
+llm: 大语言模型与应用
+data-analysis: 数据分析
+
+# —— 业务场景 ——
+ab-test: A/B 实验与因果推断
+risk-control: 风控
+recommendation: 推荐系统
+growth: 增长与运营
+payment: 支付与订阅
+
+# —— 工程 / 计算机基础 ——
+algorithm: 算法
+data-structure: 数据结构
+database: 数据库
+os: 操作系统
+network: 计算机网络
+distributed: 分布式系统
+system-design: 系统设计
+concurrency: 并发与多线程
+ios: iOS 开发
+backend: 后端工程
+
+# —— 用途 ——
+interview: 面试准备
+leetcode: 力扣刷题

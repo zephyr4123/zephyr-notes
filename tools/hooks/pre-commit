@@ -1,0 +1,4 @@
+#!/bin/sh
+# 提交前跑结构校验；有错误就拒绝提交。跳过一次：git commit --no-verify（别养成习惯）。
+root="$(git rev-parse --show-toplevel)" || exit 2
+exec python3 "$root/tools/lint.py" --quiet

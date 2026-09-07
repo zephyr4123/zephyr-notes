@@ -1,0 +1,64 @@
+{
+  "$comment": "机器契约：脚本只读这里。人读 SCHEMA.md。两边不一致以本文件为准，并立刻修 SCHEMA.md。加类型/加字段只改这里 + 模板 + 对应 README，不改 lint.py。",
+  "version": 1,
+  "id_pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+  "tag_pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+  "link_style": "markdown-relative",
+  "common_fields": {
+    "id":      {"kind": "id",      "required": true},
+    "type":    {"kind": "type",    "required": true},
+    "title":   {"kind": "string",  "required": true},
+    "summary": {"kind": "string",  "required": true},
+    "tags":    {"kind": "tags",    "required": true, "min": 1},
+    "related": {"kind": "reflist", "required": false, "targets": ["*"]},
+    "status":  {"kind": "enum",    "required": true, "values": ["draft", "stable", "deprecated"]},
+    "created": {"kind": "date",    "required": true},
+    "updated": {"kind": "date",    "required": true}
+  },
+  "types": {
+    "concept": {
+      "dir": "notes/concept",
+      "fields": {
+        "aliases": {"kind": "list", "required": false}
+      },
+      "required_headings": ["解决什么问题", "原理", "适用边界"]
+    },
+    "case": {
+      "dir": "notes/case",
+      "fields": {
+        "uses": {"kind": "reflist", "required": true, "min": 1, "targets": ["concept", "pattern"]}
+      },
+      "required_headings": ["背景", "为什么用它", "怎么做的", "结果与复盘"]
+    },
+    "problem": {
+      "dir": "notes/problem",
+      "fields": {
+        "platform":   {"kind": "enum",    "required": true,  "values": ["leetcode", "codeforces", "nowcoder", "other"]},
+        "number":     {"kind": "string",  "required": false},
+        "difficulty": {"kind": "enum",    "required": true,  "values": ["easy", "medium", "hard"]},
+        "url":        {"kind": "string",  "required": false},
+        "patterns":   {"kind": "reflist", "required": false, "targets": ["pattern"]}
+      },
+      "required_headings": ["题意", "思路", "代码", "复杂度"]
+    },
+    "qa": {
+      "dir": "notes/qa",
+      "fields": {
+        "difficulty":    {"kind": "enum", "required": false, "values": ["easy", "medium", "hard"]},
+        "last_reviewed": {"kind": "date", "required": false}
+      },
+      "required_headings": ["一句话回答", "展开"]
+    },
+    "pattern": {
+      "dir": "notes/pattern",
+      "fields": {},
+      "required_headings": ["识别信号", "模板", "例子"]
+    },
+    "map": {
+      "dir": "maps",
+      "skip_common": ["tags", "status", "created", "related"],
+      "fields": {},
+      "body": "links-only"
+    }
+  }
+}
