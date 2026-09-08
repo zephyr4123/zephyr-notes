@@ -15,4 +15,7 @@ updated: 2026-09-08
   - [Artora 识别优化 A/B：小流量下用 Fisher 判显著](../notes/case/artora-ab-satisfaction-fisher.md) ← 实际落地 + 复盘"只能用 Fisher"这个前提
 - [卡方检验（列联表独立性）](../notes/concept/statistics/chi-square-test.md) ← 同一问题的默认工具，讲清"期望频数至少 5"这条规则从哪来、什么时候该换 Fisher
 
+## 见其他索引
+- [概率与统计基础](stats-foundations.md) ← 从分布到检验的阅读顺序，先读这条线再看上面的落地
+
 ## 未归类

@@ -6,7 +6,7 @@ title: 卡方检验（列联表独立性）
 summary: 对 2×2 表，卡方统计量就是"两比例 z 检验"的平方；z 靠中心极限定理近似正态，z 的平方按定义服从卡方分布，于是得到 p 值。这条推导同时解释了统计量为什么长成 Σ(O−E)²/E、自由度为什么是 1、"期望频数 ≥ 5"这条规则从哪来。
 tags: [statistics, hypothesis-testing, ab-test]
 aliases: [Pearson 卡方检验, chi-square test, chi-squared test, 列联表独立性检验]
-related: [fisher-exact-test]
+related: [fisher-exact-test, chi-square-distribution, z-test, central-limit-theorem, normal-distribution, hypothesis-testing]
 status: stable
 created: 2026-09-08
 updated: 2026-09-08
@@ -79,7 +79,7 @@ $$
 
 ### 第 3 步：一个更熟悉的起点 —— 两比例 z 检验
 
-先不管卡方，用大学概率课就能推的方法比较两个比例。
+先不管卡方，用大学概率课就能推的方法比较两个比例。这一步的完整版本（单比例、两比例、置信区间）在 [z 检验](z-test.md)里，这里只推到卡方需要的地方。
 
 组 1 的样本成功率 $\hat p_1=a/r_1$，组 2 的 $\hat p_2=c/r_2$。每个人的结果是一个取 0 或 1 的随机变量，成功概率 $\pi$，方差 $\pi(1-\pi)$。$\hat p_1$ 是 $r_1$ 个这样的变量的平均，平均的方差是单个方差除以个数：
 
@@ -104,7 +104,7 @@ $$
 
 ### 第 4 步：z 为什么近似正态 —— 中心极限定理
 
-$\hat p_1$ 是 $r_1$ 个独立同分布的 0/1 变量的平均。中心极限定理说：独立同分布变量的平均，随着个数增加，分布趋向正态。所以 $r_1$、$r_2$ 够大时 $\hat p_1-\hat p_2$ 近似正态，标准化后的 $z$ 近似标准正态 $N(0,1)$。
+$\hat p_1$ 是 $r_1$ 个独立同分布的 0/1 变量的平均。[中心极限定理](../probability/central-limit-theorem.md)说：独立同分布变量的平均，随着个数增加，分布趋向[正态](../probability/normal-distribution.md)。所以 $r_1$、$r_2$ 够大时 $\hat p_1-\hat p_2$ 近似正态，标准化后的 $z$ 近似标准正态 $N(0,1)$。
 
 "够大"是多大？0/1 变量的和是二项分布 $\mathrm{Bin}(r,\pi)$，它的偏度是
 
@@ -166,7 +166,7 @@ $$
 
 ### 第 6 步：从正态到卡方分布
 
-卡方分布的定义：**$k$ 个独立标准正态变量的平方和**服从自由度为 $k$ 的卡方分布 $\chi^2_{(k)}$。这是定义，不是定理。
+[卡方分布](../probability/chi-square-distribution.md)的定义：**$k$ 个独立标准正态变量的平方和**服从自由度为 $k$ 的卡方分布 $\chi^2_{(k)}$。这是定义，不是定理。它的密度、期望方差、可加性在那篇里推。
 
 第 4 步说 $z$ 近似 $N(0,1)$，第 5 步说 $\chi^2=z^2$，合起来：$\chi^2$ 近似服从 $\chi^2_{(1)}$。自由度是 1，对应第 2 步"整张表只有一个自由变动的量"。
 
