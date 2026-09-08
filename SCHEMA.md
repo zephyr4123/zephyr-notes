@@ -32,7 +32,8 @@
 - `id` = 文件名去掉 `.md`，全库唯一（跨目录也不能重），格式 `^[a-z0-9]+(-[a-z0-9]+)*$`（小写字母数字 + 短横线）。
 - **id 一旦创建永不改**。改名会断链。标题想改就改 `title`。
 - 英文 slug，中文放 `title`。`problem` 类建议 `lc-0003-longest-substring` 这种带题号的 id。
-- 类型目录下不允许再建子目录，不允许放非 `.md` 文件（图片去 `assets/`）。
+- 类型目录下允许**一层领域子目录**：`notes/<type>/<domain>/<id>.md`。`domain` 必须是 `tags.yml` 登记的标签，且必须同时出现在该笔记的 `tags` 里。`concept` **必须**放进领域目录（`notes/concept/statistics/`、`notes/concept/probability/`……），其他类型可放可不放。不允许更深的嵌套；不允许放非 `.md` 文件（图片去 `assets/`）。
+- 领域是"这门学科教它"的归属，一篇只有一个；跨领域的关系用 `related` 表达，不靠目录。概率论 vs 统计学的判据见 `notes/concept/README.md`。
 
 ## 4. Frontmatter
 
@@ -54,6 +55,7 @@ key:                    # 块列表
 |---|---|---|
 | `id` | ✓ | 见 §3 |
 | `type` | ✓ | 与所在目录一致 |
+| `domain` | concept ✓ | 领域子目录名，须是 `tags.yml` 里的标签并出现在 `tags` 中；文件在 `notes/<type>/<domain>/` 下时必填，顶层不填 |
 | `title` | ✓ | 人读的标题，可中文 |
 | `summary` | ✓ | **一句话**说这篇讲什么。索引页和 Chatbot 都靠它 |
 | `tags` | ✓ | ≥ 1 个，每个都必须在 `tags.yml` 登记 |

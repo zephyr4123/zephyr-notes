@@ -24,7 +24,8 @@
 
 ## 目录规则
 
-- 类型目录下**扁平**，不建子目录。文件名 = id，全库唯一，永不改。
+- 类型目录下允许**一层领域子目录** `notes/<type>/<domain>/`，domain 是 `tags.yml` 里的标签（`statistics`、`probability`、`algorithm`……）。`concept` 必须进领域目录，其他类型可选。不允许更深。
+- 文件名 = id，全库唯一（跨目录、跨领域也不能重），永不改。
 - 只放 `.md`。图片进 `../assets/`。
 - 每个类型目录有自己的 `README.md`，写该类型的正文结构和判断标准。处理哪个目录就先读哪个 README。
 - 字段定义看 `../SCHEMA.md` §4，机器真值在 `../schema.json`。
@@ -32,7 +33,8 @@
 ## 新建
 
 ```bash
-python3 tools/new.py <type> <id> "<title>" --tags a,b --map <map-id>
+python3 tools/new.py concept <id> "<title>" --domain statistics --tags a,b --map <map-id>
+python3 tools/new.py <type> <id> "<title>" [--domain <d>] --tags a,b --map <map-id>
 ```
 
 不要手建文件。手建的容易漏字段、id 撞车、忘挂索引页，lint 会一个个报回来。

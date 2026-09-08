@@ -4,7 +4,7 @@
 
 ## 硬规则
 
-1. **新建笔记只用 `python3 tools/new.py`**，不要手建文件。它按模板生成、校验 id、可直接挂进索引页。
+1. **新建笔记只用 `python3 tools/new.py`**，不要手建文件。它按模板生成、校验 id、可直接挂进索引页。concept 必须带 `--domain`（`statistics` / `probability` …，是 `tags.yml` 里的标签），落到 `notes/concept/<domain>/`。
 2. **提交前必跑 `python3 tools/lint.py`**，有错不提交。lint 是唯一裁判。
 3. **索引页（`maps/`）只放链接**，一行一个链接，不写正文。
 4. **一篇笔记一个想法**。判断标准：「换一个业务场景这段话还成立吗」→ 成立进 `concept`，不成立进 `case`。
@@ -20,7 +20,7 @@
 ## 常用命令
 
 ```bash
-python3 tools/new.py concept fisher-exact-test "Fisher 精确检验" --tags statistics,hypothesis-testing --map math-in-biz
+python3 tools/new.py concept fisher-exact-test "Fisher 精确检验" --domain statistics --tags hypothesis-testing --map math-in-biz
 python3 tools/new.py map interview "面试准备"
 python3 tools/lint.py
 python3 -m unittest discover -s tools -p 'test_*.py'

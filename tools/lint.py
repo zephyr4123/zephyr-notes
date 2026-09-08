@@ -109,8 +109,9 @@ def parse_date(s: str):
 # ---------------------------------------------------------------- model
 
 class Note:
-    def __init__(self, path: Path, rel: str, type_name: str, fm: dict, body: str, body_offset: int = 0):
+    def __init__(self, path: Path, rel: str, type_name: str, fm: dict, body: str, body_offset: int = 0, domain_dir=None):
         self.path = path
+        self.domain_dir = domain_dir     # 所在领域子目录名；顶层为 None
         self.rel = rel
         self.type = type_name
         self.fm = fm
@@ -201,7 +202,7 @@ def load_tags(root: Path, rep: Report, pattern: str) -> dict:
     return tags
 
 
-def collect_notes(root: Path, schema: dict, rep: Report) -> list:
+def collect_notes(root: Path, schema: dict, tags: dict, rep: Report) -> list:
     notes: list = []
     declared_dirs = {(root / spec["dir"]).resolve(): t for t, spec in schema["types"].items()}
 
@@ -216,6 +217,31 @@ def collect_notes(root: Path, schema: dict, rep: Report) -> list:
             else:
                 rep.error(rel_of(root, child), "notes/ 根下不允许放文件，笔记必须进类型目录")
 
+    dom = schema.get("domains", {})
+    dom_required = set(dom.get("required_for", []))
+    dom_allowed = set(dom.get("allowed_for", []))
+
+    def load_note(p: Path, type_name: str, domain_dir):
+        r = rel_of(root, p)
+        if p.suffix != ".md":
+            rep.error(r, "类型目录只放 .md；附件去 assets/")
+            return
+        try:
+            text = p.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            rep.error(r, "不是 UTF-8 文本")
+            return
+        try:
+            fm_text, body, offset = split_frontmatter(text)
+            if fm_text is None:
+                rep.error(r, "缺少 frontmatter（文件必须以 --- 开头）")
+                return
+            fm = parse_frontmatter(fm_text)
+        except LintError as e:
+            rep.error(r, str(e))
+            return
+        notes.append(Note(p, r, type_name, fm, body, offset, domain_dir))
+
     for type_name, spec in schema["types"].items():
         d = root / spec["dir"]
         if not d.exists():
@@ -226,26 +252,24 @@ def collect_notes(root: Path, schema: dict, rep: Report) -> list:
                 continue
             r = rel_of(root, p)
             if p.is_dir():
-                rep.error(r, "类型目录下不允许再建子目录（目录扁平，主题去 maps/）")
-                continue
-            if p.suffix != ".md":
-                rep.error(r, "类型目录只放 .md；附件去 assets/")
-                continue
-            try:
-                text = p.read_text(encoding="utf-8")
-            except UnicodeDecodeError:
-                rep.error(r, "不是 UTF-8 文本")
-                continue
-            try:
-                fm_text, body, offset = split_frontmatter(text)
-                if fm_text is None:
-                    rep.error(r, "缺少 frontmatter（文件必须以 --- 开头）")
+                if type_name not in dom_allowed:
+                    rep.error(r, f"类型 `{type_name}` 不允许领域子目录（schema.json 的 domains.allowed_for）")
                     continue
-                fm = parse_frontmatter(fm_text)
-            except LintError as e:
-                rep.error(r, str(e))
+                if p.name not in tags:
+                    rep.error(r, f"领域目录名 `{p.name}` 不是 tags.yml 里登记的标签；领域 = 一个已登记的标签")
+                    continue
+                for q in sorted(p.iterdir()):
+                    if q.name in EXEMPT_FILES or q.name.startswith("."):
+                        continue
+                    if q.is_dir():
+                        rep.error(rel_of(root, q), "领域目录下不允许再建子目录（只允许一层：notes/<type>/<domain>/）")
+                        continue
+                    load_note(q, type_name, p.name)
                 continue
-            notes.append(Note(p, r, type_name, fm, body, offset))
+            if type_name in dom_required:
+                rep.error(r, f"类型 `{type_name}` 必须放进领域子目录：notes/{type_name}/<domain>/<id>.md（domain 是 tags.yml 里的标签）")
+                continue
+            load_note(p, type_name, None)
     return notes
 
 
@@ -271,7 +295,7 @@ def check_fields(note: Note, schema: dict, tags: dict, rep: Report):
         kind = f["kind"]
         required = f.get("required", False)
 
-        if kind in ("id", "type", "string", "enum", "date"):
+        if kind in ("id", "type", "string", "enum", "date", "domain"):
             if isinstance(val, list):
                 rep.error(note.rel, f"字段 `{key}` 应是标量，不是列表")
                 continue
@@ -280,7 +304,15 @@ def check_fields(note: Note, schema: dict, tags: dict, rep: Report):
                     rep.error(note.rel, f"必填字段 `{key}` 为空")
                 continue  # 非必填字段允许留空串
 
-        if kind == "id":
+        if kind == "domain":
+            if val not in tags:
+                rep.error(note.rel, f"domain `{val}` 未在 tags.yml 登记")
+            elif note.domain_dir != val:
+                rep.error(note.rel, f"domain `{val}` 与所在目录 `{note.domain_dir}` 不一致；文件要放在 notes/{note.type}/{val}/")
+            tag_list = note.fm.get("tags")
+            if isinstance(tag_list, list) and val not in tag_list:
+                rep.error(note.rel, f"domain `{val}` 必须同时出现在 tags 里（领域是最主要的那个标签）")
+        elif kind == "id":
             if not re.match(schema["id_pattern"], val):
                 rep.error(note.rel, f"id 不合法（要 kebab-case，小写字母数字加短横线）：{val}")
             if val != note.path.stem:
@@ -319,6 +351,11 @@ def check_fields(note: Note, schema: dict, tags: dict, rep: Report):
                     elif v == note.id:
                         rep.error(note.rel, f"字段 `{key}` 引用了自己")
                 note.refs.append((key, f, val))
+
+    if note.domain_dir and "domain" not in note.fm:
+        rep.error(note.rel, f"文件在领域目录 `{note.domain_dir}` 下，frontmatter 必须写 `domain: {note.domain_dir}`")
+    if not note.domain_dir and "domain" in note.fm:
+        rep.error(note.rel, "写了 domain 字段但文件不在领域子目录里；移到 notes/<type>/<domain>/ 下")
 
     c, u = note.dates.get("created"), note.dates.get("updated")
     if c and u and u < c:
@@ -521,7 +558,7 @@ def run(root: Path) -> Report:
     if schema is None:
         return rep
     tags = load_tags(root, rep, schema["tag_pattern"])
-    notes = collect_notes(root, schema, rep)
+    notes = collect_notes(root, schema, tags, rep)
 
     for n in notes:
         check_fields(n, schema, tags, rep)

@@ -1,6 +1,7 @@
 ---
 id: fisher-exact-test
 type: concept
+domain: statistics
 title: Fisher 精确检验
 summary: 对 2×2 列联表，把总成功数当成已知条件后，未知的成功率会从概率里整个约掉，剩下的超几何分布可以直接算出精确 p 值；任何样本量都成立，是卡方近似不可靠时的标准替代。
 tags: [statistics, hypothesis-testing, ab-test]
@@ -158,9 +159,9 @@ $$
 
 R 的 `fisher.test` 和 scipy 的 `fisher_exact` 默认用这个定义。另一种定义是把单侧 $p$ 乘 2（超过 1 就截成 1）。两种定义结果可能不同，报告时要写明用的哪种。
 
-下图是 [Artora A/B 实验](../case/artora-ab-satisfaction-fisher.md)那张表（$n=584$，$r_1=277$，$c_1=376$）在 $H_0$ 下 $A$ 的分布。期望是 $r_1c_1/n=178.3$，实际观测 $191$。红色柱是所有概率不超过 $P(A=191)$ 的表，左边一截右边一截，加起来就是双侧 $p=0.031$：
+下图是 [Artora A/B 实验](../../case/artora-ab-satisfaction-fisher.md)那张表（$n=584$，$r_1=277$，$c_1=376$）在 $H_0$ 下 $A$ 的分布。期望是 $r_1c_1/n=178.3$，实际观测 $191$。红色柱是所有概率不超过 $P(A=191)$ 的表，左边一截右边一截，加起来就是双侧 $p=0.031$：
 
-![原假设下试验组满意数的超几何分布，红色柱之和为双侧 p](../../assets/fisher-exact-test/pmf.jpg)
+![原假设下试验组满意数的超几何分布，红色柱之和为双侧 p](../../../assets/fisher-exact-test/pmf.jpg)
 
 ### 第 6 步："精确"的含义，以及它的代价
 
@@ -176,7 +177,7 @@ R 的 `fisher.test` 和 scipy 的 `fisher_exact` 默认用这个定义。另一�
 | 1 或 3 | $a=0,1,3,4$ | $34/70\approx 0.486$ |
 | 2 | 全部 | $1$ |
 
-![n=8 时只有 5 种表，p 值只能取 3 个值](../../assets/fisher-exact-test/toy-pmf.jpg)
+![n=8 时只有 5 种表，p 值只能取 3 个值](../../../assets/fisher-exact-test/toy-pmf.jpg)
 
 后果：按 $\alpha=0.05$ 判显著，只有 $a=0$ 或 $4$ 才过线，而这两张表在 $H_0$ 下的总概率是 $2/70\approx 2.9\%$，不是 5%。也就是说**真实的第一类错误率低于名义水平**，检验偏保守，该拒绝的时候有时拒绝不了（功效损失）。样本大了可取的 $p$ 值越来越密，这个差距就缩小到可以忽略。
 
@@ -189,7 +190,7 @@ R 的 `fisher.test` 和 scipy 的 `fisher_exact` 默认用这个定义。另一�
 
 下图把 Artora 那张表按两组实际比例等比例缩小，看三种检验的 $p$ 随总样本量怎么变：三条线在最小期望频数 $\ge 5$ 之后就贴在一起了，只有在最左边几十个样本的区域才明显分开。曲线有锯齿是因为缩放后人数要取整，不是方法本身的问题。
 
-![同样的比例差，Fisher、卡方、Yates 的 p 随样本量变化](../../assets/fisher-exact-test/vs-chi2.jpg)
+![同样的比例差，Fisher、卡方、Yates 的 p 随样本量变化](../../../assets/fisher-exact-test/vs-chi2.jpg)
 
 - **前提是观测相互独立**，这是第 1 步写模型时就用了的假设。同一个用户多次提交都算进去，独立性就破了，$p$ 会偏乐观。
 - **它只回答"差异是否为零"，不回答"差多少"。** 汇报要带效应量：比例差 $\hat p_1-\hat p_2$ 加置信区间（两比例差用 Newcombe 法比 Wald 法稳）。
@@ -240,4 +241,4 @@ def fisher_exact(a, b, c, d):
 (0.01756679091466034, 0.030692257982606948)
 ```
 
-真实数据的用法见 [Artora 识别优化 A/B](../case/artora-ab-satisfaction-fisher.md)。图由 `tools/figures/fisher-exact-test.py` 生成。
+真实数据的用法见 [Artora 识别优化 A/B](../../case/artora-ab-satisfaction-fisher.md)。图由 `tools/figures/fisher-exact-test.py` 生成。

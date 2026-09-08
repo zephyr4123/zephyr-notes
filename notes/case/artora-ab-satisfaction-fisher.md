@@ -47,7 +47,7 @@ Artora 的识别优化项目在跑 A/B 实验：
 
 ### 从问题形状到候选方法
 
-二元结果、两组、比比例，教科书上的候选有三个：两比例 $z$ 检验、[卡方检验](../concept/chi-square-test.md)、[Fisher 精确检验](../concept/fisher-exact-test.md)。前两个本质是同一个东西（$z^2=\chi^2$），依赖大样本正态近似；Fisher 不做近似，把所有可能的表枚举出来直接算概率。
+二元结果、两组、比比例，教科书上的候选有三个：两比例 $z$ 检验、[卡方检验](../concept/statistics/chi-square-test.md)、[Fisher 精确检验](../concept/statistics/fisher-exact-test.md)。前两个本质是同一个东西（$z^2=\chi^2$），依赖大样本正态近似；Fisher 不做近似，把所有可能的表枚举出来直接算概率。
 
 当时的推理是："流量小 → 大样本近似靠不住 → 卡方做不了 → 只能用 Fisher。"
 
@@ -97,7 +97,7 @@ def fisher(a,b,c,d):
 print('fisher p =',round(fisher(b_s,b_n-b_s,a_s,a_n-a_s),3))
 ```
 
-每一行对应原理的哪一步（推导见 [Fisher 精确检验](../concept/fisher-exact-test.md)）：
+每一行对应原理的哪一步（推导见 [Fisher 精确检验](../concept/statistics/fisher-exact-test.md)）：
 
 | 代码 | 做什么 | 对应原理 |
 |---|---|---|
@@ -144,7 +144,7 @@ $p$ 值说的只有这一件事。它不说差多少，不说是三处改动里�
 
 ### 补算 1：期望频数，检查"卡方做不了"
 
-卡方能不能用，看的是每个格子的期望频数够不够（为什么，见[卡方检验](../concept/chi-square-test.md)第 4 步），不是看总人数。算一下：
+卡方能不能用，看的是每个格子的期望频数够不够（为什么，见[卡方检验](../concept/statistics/chi-square-test.md)第 4 步），不是看总人数。算一下：
 
 - 合并满意率 $\bar p=376/584=0.644$
 - 试验组：期望满意 $277\times 0.644=178.3$，期望非满意 $277\times 0.356=98.7$

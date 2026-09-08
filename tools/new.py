@@ -2,7 +2,8 @@
 """按模板新建一篇笔记或索引页。零依赖。
 
 用法：
-  python3 tools/new.py <type> <id> "<title>" [--tags a,b] [--map <map-id>]
+  python3 tools/new.py concept <id> "<title>" --domain statistics [--tags a,b] [--map <map-id>]
+  python3 tools/new.py <type> <id> "<title>" [--domain <d>] [--tags a,b] [--map <map-id>]
   python3 tools/new.py map <id> "<title>"
 
 做的事：
@@ -38,8 +39,10 @@ def load_schema(root: Path) -> dict:
 
 def find_existing(root: Path, schema: dict, note_id: str):
     for spec in schema["types"].values():
-        p = root / spec["dir"] / f"{note_id}.md"
-        if p.exists():
+        d = root / spec["dir"]
+        if not d.exists():
+            continue
+        for p in d.glob(f"**/{note_id}.md"):
             return p
     return None
 
@@ -77,11 +80,22 @@ def attach_to_map(root: Path, schema: dict, map_id: str, note_path: Path, title:
     return map_path
 
 
-def create(root: Path, type_name: str, note_id: str, title: str, tags=None, map_id=None, today=None) -> Path:
+def create(root: Path, type_name: str, note_id: str, title: str, tags=None, map_id=None, today=None, domain=None) -> Path:
     schema = load_schema(root)
     today = today or date.today().isoformat()
     if type_name not in schema["types"]:
         raise NewError(f"未知类型 `{type_name}`；可选：{', '.join(schema['types'])}")
+    dom = schema.get("domains", {})
+    if domain:
+        if type_name not in dom.get("allowed_for", []):
+            raise NewError(f"类型 `{type_name}` 不支持领域目录")
+        if not re.match(schema["id_pattern"], domain):
+            raise NewError(f"domain 不合法（要 kebab-case）：{domain}")
+        tags = list(tags or [])
+        if domain not in tags:
+            tags.insert(0, domain)
+    elif type_name in dom.get("required_for", []):
+        raise NewError(f"类型 `{type_name}` 必须指定 --domain（tags.yml 里的一个标签，如 statistics / probability）")
     if not re.match(schema["id_pattern"], note_id):
         raise NewError(f"id 不合法（要 kebab-case，小写字母数字加短横线）：{note_id}")
     if not title.strip():
@@ -94,10 +108,14 @@ def create(root: Path, type_name: str, note_id: str, title: str, tags=None, map_
         raise NewError(f"模板不存在：{tpl.relative_to(root)}")
 
     out_dir = root / schema["types"][type_name]["dir"]
+    if domain:
+        out_dir = out_dir / domain
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / f"{note_id}.md"
     text = render(tpl.read_text(encoding="utf-8"),
-                  id=note_id, title=title, date=today, tags=", ".join(tags or []))
+                  id=note_id, title=title, date=today, tags=", ".join(tags or []), domain=domain or "")
+    if domain and "domain:" not in text.split("---")[1]:
+        text = re.sub(r"^(type: .*)$", lambda m: m.group(1) + f"\ndomain: {domain}", text, count=1, flags=re.M)
     out.write_text(text, encoding="utf-8")
 
     if map_id:
@@ -114,11 +132,12 @@ def main(argv=None) -> int:
     ap.add_argument("title")
     ap.add_argument("--tags", default="", help="逗号分隔，须在 tags.yml 登记")
     ap.add_argument("--map", dest="map_id", help="顺手挂进这个索引页的「## 未归类」节")
+    ap.add_argument("--domain", help="领域子目录（tags.yml 里的标签）；concept 必填，如 statistics / probability")
     ap.add_argument("--root", type=Path, default=DEFAULT_ROOT)
     args = ap.parse_args(argv)
     tags = [t.strip() for t in args.tags.split(",") if t.strip()]
     try:
-        out = create(args.root.resolve(), args.type, args.id, args.title, tags, args.map_id)
+        out = create(args.root.resolve(), args.type, args.id, args.title, tags, args.map_id, domain=args.domain)
     except NewError as e:
         print(f"✗ {e}", file=sys.stderr)
         return 2

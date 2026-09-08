@@ -1,6 +1,7 @@
 ---
 id: {{id}}
 type: concept
+domain: {{domain}}
 title: {{title}}
 summary: ""
 tags: [{{tags}}]

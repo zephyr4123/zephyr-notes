@@ -1,6 +1,7 @@
 ---
 id: chi-square-test
 type: concept
+domain: statistics
 title: 卡方检验（列联表独立性）
 summary: 对 2×2 表，卡方统计量就是"两比例 z 检验"的平方；z 靠中心极限定理近似正态，z 的平方按定义服从卡方分布，于是得到 p 值。这条推导同时解释了统计量为什么长成 Σ(O−E)²/E、自由度为什么是 1、"期望频数 ≥ 5"这条规则从哪来。
 tags: [statistics, hypothesis-testing, ab-test]
@@ -74,7 +75,7 @@ $$
 
 下图是 Artora 表的四个格子，标出了每格的 $O-E$，确实是 $\pm 12.66$：
 
-![Artora 表四个格子的观测值与期望值，偏离量大小相同](../../assets/chi-square-test/observed-expected.jpg)
+![Artora 表四个格子的观测值与期望值，偏离量大小相同](../../../assets/chi-square-test/observed-expected.jpg)
 
 ### 第 3 步：一个更熟悉的起点 —— 两比例 z 检验
 
@@ -115,7 +116,7 @@ $$
 
 下图左边是 Artora 试验组"非满意"格子的实际参数（$n=277$，比例 $0.356$，期望约 $99$），二项分布和正态曲线几乎重合；右边是假想的稀疏格子（期望 $2$），二项分布是几根歪斜的柱子，正态曲线套不上：
 
-![二项分布与正态近似：期望 99 时贴合，期望 2 时失真](../../assets/chi-square-test/approximation.jpg)
+![二项分布与正态近似：期望 99 时贴合，期望 2 时失真](../../../assets/chi-square-test/approximation.jpg)
 
 ### 第 5 步：z 的平方就是卡方统计量
 
@@ -185,7 +186,7 @@ Python 里一行：`erfc(sqrt(chi2 / 2))`。注意平方之后正负方向的信
 
 下图是同一个 $p$ 的两种画法：左边标准正态两个尾巴的面积，右边卡方分布一个尾巴的面积，都是 $0.0285$：
 
-![标准正态的双尾面积等于卡方分布的单尾面积](../../assets/chi-square-test/tail.jpg)
+![标准正态的双尾面积等于卡方分布的单尾面积](../../../assets/chi-square-test/tail.jpg)
 
 ### 第 7 步：推广到更大的表
 

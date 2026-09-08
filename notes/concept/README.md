@@ -4,6 +4,19 @@
 
 **不放什么**：具体业务的数据、参数、踩坑。那些进 `../case/`，用 `uses` 指回这里。写着写着出现「我们的 AB 实验」「某某系统」这种词，就是该剪去 case 的信号。
 
+## 领域目录：一篇只属于一个学科
+
+concept 必须放进领域子目录：`notes/concept/<domain>/<id>.md`，`domain` 是 `tags.yml` 里的一个标签，写进 frontmatter 并出现在 `tags` 里。现有领域各有一个 README 说明边界：
+
+| 领域 | 放什么 | 不放什么 |
+|---|---|---|
+| `probability/` | 随机变量、分布、极限定理：二项、超几何、正态、卡方分布、中心极限定理 | 用数据做推断的方法 |
+| `statistics/` | 用数据推断未知：假设检验框架、各具体检验、置信区间、功效 | 分布本身的定义与性质 |
+
+**判据：没有"样本"和"要估的未知参数"就是概率论；出现样本、估计、检验、区间就是统计学。** 卡方分布进 probability，卡方检验进 statistics，两篇用 `related` 互指。
+
+加领域 = 在 `tags.yml` 登记标签 + `mkdir notes/concept/<domain>` + 写一个 README 讲边界。领域是学科归属，不是主题；主题（面试、A/B）去 `maps/` 建索引页。
+
 ## 写作深度：教科书章节，不是速查卡
 
 读者画像：**有大学数学基础（微积分、概率论、线性代数）但不以数学为生的人**。写给这个人看，标准是他能顺着读懂并自己推一遍。
@@ -52,6 +65,7 @@
 ---
 id: fisher-exact-test
 type: concept
+domain: statistics
 title: Fisher 精确检验
 summary: 2×2 列联表小样本下计算精确 p 值的方法，期望频数不足时替代卡方检验。
 tags: [statistics, hypothesis-testing]

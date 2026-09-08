@@ -13,6 +13,10 @@
       "kind": "type",
       "required": true
     },
+    "domain": {
+      "kind": "domain",
+      "required": false
+    },
     "title": {
       "kind": "string",
       "required": true
@@ -196,5 +200,18 @@
     ],
     "warn_bytes": 307200,
     "max_bytes": 1048576
+  },
+  "domains": {
+    "$comment": "一级领域目录：notes/<type>/<domain>/<id>.md。domain 必须是 tags.yml 登记的标签，且必须出现在该笔记的 tags 里；只允许一层。required_for 里的类型必须放进领域目录，allowed_for 里的可放可不放。",
+    "required_for": [
+      "concept"
+    ],
+    "allowed_for": [
+      "concept",
+      "case",
+      "problem",
+      "qa",
+      "pattern"
+    ]
   }
 }
