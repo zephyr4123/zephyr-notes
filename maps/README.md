@@ -15,10 +15,10 @@
 # 业务 × 原理
 
 ## 假设检验
-- [Fisher 精确检验](../notes/concept/fisher-exact-test.md) ← 小样本二分类先看这个
+- [Fisher 精确检验](../notes/concept/statistics/fisher-exact-test.md) ← 小样本二分类先看这个
   - [小样本 AB 用 Fisher 判显著](../notes/case/ab-test-small-sample-fisher.md)
   - [风控特征显著性](../notes/case/risk-feature-significance-fisher.md)
-- [卡方检验](../notes/concept/chi-square-test.md)
+- [卡方检验](../notes/concept/statistics/chi-square-test.md)
 
 ## 见其他索引
 - [面试准备](interview.md)

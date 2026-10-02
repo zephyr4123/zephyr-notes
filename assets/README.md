@@ -11,7 +11,13 @@
 从 `notes/<type>/` 引用：
 
 ```markdown
-![H0 下的超几何分布](../../assets/fisher-exact-test/pmf.jpg)
+![两组满意度与差值的 95% 置信区间](../../assets/artora-ab-satisfaction-fisher/ci.jpg)
+```
+
+从领域目录 `notes/<type>/<domain>/` 引用（concept 都在这里），多一层 `../`：
+
+```markdown
+![H0 下的超几何分布](../../../assets/fisher-exact-test/pmf.jpg)
 ```
 
 从 `maps/` 引用（索引页一般不放图）：`../assets/...`。

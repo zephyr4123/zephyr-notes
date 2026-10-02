@@ -100,8 +100,8 @@ key:                    # 块列表
 
 规则：
 - **下游指上游，上游不回指**。case 指 concept，concept 不用列谁用了它；反向关系由工具/编辑器的反链生成。
-- 正文链接用**标准 markdown 相对路径**：`[Fisher 精确检验](../concept/fisher-exact-test.md)`。**不用 `[[wikilink]]`**（GitHub 不渲染），lint 会拦。
-- 图片：`![说明](../../assets/<note-id>-<desc>.png)`，文件必须在 `assets/`。
+- 正文链接用**标准 markdown 相对路径**：`[Fisher 精确检验](../concept/statistics/fisher-exact-test.md)`（从 `notes/case/` 链向领域目录里的 concept）。**不用 `[[wikilink]]`**（GitHub 不渲染），lint 会拦。
+- 图片：`![说明](../../assets/<note-id>/<desc>.jpg)`（从 `notes/<type>/`；在领域目录里多一层 `../`），一篇一个子目录，位图只放 JPEG，见 `assets/README.md`。
 - 所有链接目标必须存在，否则报错。
 
 ## 6. 索引页（maps/）的正文规则
@@ -110,7 +110,7 @@ key:                    # 块列表
 
 ```markdown
 ## 假设检验
-- [Fisher 精确检验](../notes/concept/fisher-exact-test.md) ← 小样本二分类先看这个
+- [Fisher 精确检验](../notes/concept/statistics/fisher-exact-test.md) ← 小样本二分类先看这个
   - [小样本 AB 用 Fisher 判显著](../notes/case/ab-test-small-sample-fisher.md)
 ```
 
