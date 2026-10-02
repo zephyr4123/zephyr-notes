@@ -1,6 +1,6 @@
 # templates/：笔记模板
 
-`tools/new.py` 按类型取这里的模板生成文件。**每个类型一个模板，文件名 = 类型名**：`concept.md`、`case.md`、`problem.md`、`qa.md`、`pattern.md`、`map.md`。
+`tools/new.py` 按类型取这里的模板生成文件。**每个类型一个模板，文件名 = 类型名**：`concept.md`、`case.md`、`problem.md`、`qa.md`、`pattern.md`、`source.md`、`map.md`。
 
 ## 占位符
 

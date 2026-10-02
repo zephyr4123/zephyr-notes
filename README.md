@@ -11,6 +11,7 @@
  ├──────────────────────────────────────────────────────────────┤
  │  内容层  notes/         「东西本身」                           │
  │  一篇一个想法，按类型分目录：concept case problem qa pattern    │
+ │  source（读外部材料的笔记）例外：一份材料一篇                    │
  │  文件名即 id 永不改；笔记之间用链接互指，不靠目录表达关系        │
  ├──────────────────────────────────────────────────────────────┤
  │  契约层  schema.json + templates/ + tools/                    │
@@ -41,6 +42,7 @@
 | `notes/problem/` | 一道题一篇：力扣、系统设计题 | [README](notes/problem/README.md) |
 | `notes/qa/` | 一问一答的八股 | [README](notes/qa/README.md) |
 | `notes/pattern/` | 在多处重复出现的套路 | [README](notes/pattern/README.md) |
+| `notes/source/` | 读外部材料的笔记：一篇博客、论文、一本书 | [README](notes/source/README.md) |
 | `maps/` | 索引页，只放链接 | [README](maps/README.md) |
 | `inbox/` | 还没整理的随手记 | [README](inbox/README.md) |
 | `templates/` | 每种类型一个模板，`new.py` 用 | [README](templates/README.md) |
@@ -72,7 +74,7 @@ git add -A && git commit -m "新增 concept：Fisher 精确检验" && git push
 ## 五条规矩
 
 1. **文件名即 id，永不改名。** 改名断链。改标题改 `title`。
-2. **一篇一个想法。** 大文件既没法在想法级别互链，切 chunk 也切得稀碎。
+2. **一篇一个想法。** 大文件既没法在想法级别互链，切 chunk 也切得稀碎。唯一例外是 `source`：一份外部材料一篇，想法要单独引用时再提炼成 concept。
 3. **索引页只放链接。** 写了正文它就退化成按主题的大文件，前面的好处全没。lint 会拦。
 4. **标签走受控词表。** `tags.yml` 没登记的标签 lint 会拦，防 `ml` / `machine-learning` 漂移。
 5. **下游指上游。** case 指 concept，problem 指 pattern；上游不回指，反链由工具生成。

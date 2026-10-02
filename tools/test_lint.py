@@ -71,6 +71,29 @@ updated: 2026-09-07
 显著。
 """
 
+SOURCE = """---
+id: some-blog-post
+type: source
+domain: agent-engineering
+title: 某篇博客的学习笔记
+summary: 一份外部材料读懂了什么。
+tags: [agent-engineering, evaluation]
+format: blog
+url: https://example.com/post
+author: 某人
+published: 2026-09-28
+related: [fisher-exact-test]
+status: stable
+created: 2026-10-02
+updated: 2026-10-02
+---
+
+# 某篇博客的学习笔记
+
+## 0. 来源与关联
+正文结构跟着原材料走，不设必需标题。
+"""
+
 MAP = """---
 id: math-in-biz
 type: map
@@ -94,7 +117,7 @@ class VaultCase(unittest.TestCase):
         for f in ("schema.json", "tags.yml"):
             shutil.copy(REPO / f, self.tmp / f)
         shutil.copytree(REPO / "templates", self.tmp / "templates")
-        for d in ("notes/concept/statistics", "notes/case", "notes/problem", "notes/qa", "notes/pattern", "maps", "assets", "inbox"):
+        for d in ("notes/concept/statistics", "notes/case", "notes/problem", "notes/qa", "notes/pattern", "notes/source", "maps", "assets", "inbox"):
             (self.tmp / d).mkdir(parents=True)
 
     def tearDown(self):
@@ -487,6 +510,47 @@ class TestReachability(VaultCase):
         self.assert_error(self.run_lint(), "孤儿")
 
 
+class TestSource(VaultCase):
+    SRC_PATH = "notes/source/agent-engineering/some-blog-post.md"
+
+    def with_source(self, text=SOURCE):
+        self.valid_vault()
+        self.write(self.SRC_PATH, text)
+        self.write("maps/math-in-biz.md", MAP + "- [某篇博客](../notes/source/agent-engineering/some-blog-post.md) ← 读书笔记\n")
+
+    def test_source_without_required_headings_passes(self):
+        self.with_source()
+        rep = self.run_lint()
+        self.assertTrue(rep.ok, rep.errors)
+
+    def test_source_requires_url(self):
+        self.with_source(SOURCE.replace("url: https://example.com/post\n", ""))
+        self.assert_error(self.run_lint(), "缺少必填字段 `url`")
+
+    def test_source_url_must_be_http(self):
+        self.with_source(SOURCE.replace("url: https://example.com/post", "url: 见原文"))
+        self.assert_error(self.run_lint(), "字段 `url` 取值 `见原文` 不符合格式")
+
+    def test_source_format_must_be_chosen(self):
+        self.with_source(SOURCE.replace("format: blog", 'format: ""'))
+        self.assert_error(self.run_lint(), "必填字段 `format` 为空")
+
+    def test_source_domain_optional(self):
+        self.valid_vault()
+        self.write("notes/source/some-blog-post.md", SOURCE.replace("domain: agent-engineering\n", ""))
+        self.write("maps/math-in-biz.md", MAP + "- [某篇博客](../notes/source/some-blog-post.md)\n")
+        rep = self.run_lint()
+        self.assertTrue(rep.ok, rep.errors)
+
+    def test_optional_url_empty_skips_pattern(self):
+        """problem 的 url 选填：留空不触发格式检查。"""
+        self.valid_vault()
+        p = new.create(self.tmp, "problem", "lc-0001-two-sum", "两数之和", tags=["leetcode"], map_id="math-in-biz", today=TODAY)
+        p.write_text(p.read_text(encoding="utf-8").replace('summary: ""', "summary: 一句话。"), encoding="utf-8")
+        rep = self.run_lint()
+        self.assertTrue(rep.ok, rep.errors)
+
+
 class TestStructure(VaultCase):
     def test_undeclared_type_dir(self):
         self.valid_vault()
@@ -529,10 +593,12 @@ class TestNew(VaultCase):
             text = p.read_text(encoding="utf-8").replace('summary: ""', "summary: 一句话。")
             if t == "case":
                 text = text.replace("uses: []", "uses: [sample-concept]")
+            if t == "source":
+                text = text.replace('format: ""', "format: blog").replace('url: ""', "url: https://example.com/x")
             p.write_text(text, encoding="utf-8")
         rep = self.run_lint()
         self.assertTrue(rep.ok, rep.errors)
-        self.assertEqual(rep.stats["edges"], 6)  # home→5 篇 + case→concept
+        self.assertEqual(rep.stats["edges"], 7)  # home→6 篇 + case→concept
 
     def test_map_template_generates_lintable_map(self):
         p = new.create(self.tmp, "map", "interview", "面试准备", today=TODAY)

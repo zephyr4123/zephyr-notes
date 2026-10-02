@@ -6,7 +6,7 @@
 
 ```
  maps/        索引层：只有链接。一个视角一个文件。加类目 = 加文件，笔记不动。
- notes/       内容层：一篇一个想法，按类型分目录。文件名即 id，永不改名。
+ notes/       内容层：一篇一个想法（source 是一份材料一篇），按类型分目录。文件名即 id，永不改名。
  schema.json  契约层：类型、字段、边的规则。templates/ 按它生成，tools/ 按它校验。
  templates/
  tools/
@@ -23,9 +23,10 @@
 | `problem` | `notes/problem/` | 有题面、有输入输出 | 力扣 / 系统设计题 |
 | `qa` | `notes/qa/` | 一问一答、准备背的 | 面试八股 |
 | `pattern` | `notes/pattern/` | 在 ≥ 2 篇 problem/case 里重复出现的套路 | 滑动窗口、分布式锁 |
+| `source` | `notes/source/` | **范围由一份外部材料划定** | 读一篇博客 / 论文 / 一本书的笔记 |
 | `map` | `maps/` | 不是内容，是目录 | 索引页 |
 
-拿不准就进 `inbox/`，不要硬归。类型永远不按主题加（「面试」「数学」是索引页，不是类型）。
+`source` 是「一篇一个想法」唯一的例外：一份材料一篇，整份保留作者的论证顺序；其中某个想法要单独被引用时，再提炼成 `concept`，`related` 指回 source。拿不准就进 `inbox/`，不要硬归。类型永远不按主题加（「面试」「数学」是索引页，不是类型）。
 
 ## 3. id 与文件名
 
@@ -75,11 +76,17 @@ key:                    # 块列表
 | `problem` | `platform` | ✓ | `leetcode` / `codeforces` / `nowcoder` / `other` |
 | | `number` | | 题号，字符串 |
 | | `difficulty` | ✓ | `easy` / `medium` / `hard` |
-| | `url` | | 题目链接 |
+| | `url` | | 题目链接；填了就须以 `http(s)://` 开头 |
 | | `patterns` | | 用到的 `pattern` id 列表 |
 | `qa` | `difficulty` | | 同上 |
 | | `last_reviewed` | | 上次复习日期，以后做间隔复习 |
 | `pattern` | 无 | | 例题靠反向链接（哪些 problem/case 指向它） |
+| `source` | `format` | ✓ | `blog` / `paper` / `book` / `video` / `course` / `doc` |
+| | `url` | ✓ | 原文链接，须以 `http://` 或 `https://` 开头 |
+| | `author` | | 作者，可带机构 |
+| | `published` | | 原文发布日期；`created` 是写笔记的日期 |
+
+字符串字段可以在 `schema.json` 里带 `pattern`（正则），有值就按它校验，选填字段留空不查。两个 `url` 都用这个机制。
 
 ## 5. 边（链接）
 
@@ -115,7 +122,7 @@ key:                    # 块列表
 
 ## 8. 正文结构
 
-每种类型有**必须出现的二级标题**（`schema.json` 的 `required_headings`），模板已带。为的是同类笔记长得一样，人好扫、机器好切 chunk。标题之外可以随意加节。
+每种类型有**必须出现的二级标题**（`schema.json` 的 `required_headings`），模板已带。`source` 例外：不设必需标题，正文结构跟着原材料走。为的是同类笔记长得一样，人好扫、机器好切 chunk。标题之外可以随意加节。
 
 ### 8.1 数学公式（lint 会查）
 

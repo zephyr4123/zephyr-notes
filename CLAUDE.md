@@ -7,7 +7,7 @@
 1. **新建笔记只用 `python3 tools/new.py`**，不要手建文件。它按模板生成、校验 id、可直接挂进索引页。concept 必须带 `--domain`（`statistics` / `probability` …，是 `tags.yml` 里的标签），落到 `notes/concept/<domain>/`。
 2. **提交前必跑 `python3 tools/lint.py`**，有错不提交。lint 是唯一裁判。
 3. **索引页（`maps/`）只放链接**，一行一个链接，不写正文。
-4. **一篇笔记一个想法**。判断标准：「换一个业务场景这段话还成立吗」→ 成立进 `concept`，不成立进 `case`。
+4. **一篇笔记一个想法**。判断标准：「换一个业务场景这段话还成立吗」→ 成立进 `concept`，不成立进 `case`。例外：读外部材料（博客、论文、书）的笔记进 `source`，一份材料一篇，规则见 `notes/source/README.md`。
 5. **id 即文件名，永不改名。** 不复制别的笔记内容，用链接。
 6. **标签必须在 `tags.yml` 登记**，没有就先加一行再用。
 7. 拿不准类型就放 `inbox/`，不要硬归。

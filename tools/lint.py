@@ -323,6 +323,9 @@ def check_fields(note: Note, schema: dict, tags: dict, rep: Report):
         elif kind == "enum":
             if val not in f["values"]:
                 rep.error(note.rel, f"字段 `{key}` 取值 `{val}` 不在 {f['values']} 中")
+        elif kind == "string" and f.get("pattern"):
+            if not re.match(f["pattern"], val):
+                rep.error(note.rel, f"字段 `{key}` 取值 `{val}` 不符合格式 `{f['pattern']}`")
         elif kind == "date":
             d = parse_date(val)
             if d is None:

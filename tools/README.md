@@ -28,7 +28,7 @@ python3 tools/lint.py --root DIR # 校验别的目录（测试用）
 | 结构 | `notes/` 下的目录都在 schema 里；类型目录只有 .md 或一层领域子目录（目录名是已登记标签）；concept 必须在领域目录里；`domain` 字段与目录一致且在 tags 中 | 错误 |
 | frontmatter | 能解析（只认三种写法，见 SCHEMA §4）；无未声明字段；必填齐 | 错误 |
 | id | kebab-case；= 文件名；全库唯一 | 错误 |
-| 字段 | enum 取值合法；日期合法且 `updated ≥ created`；`summary` 非空 | 错误 |
+| 字段 | enum 取值合法；日期合法且 `updated ≥ created`；`summary` 非空；字符串字段带 `pattern` 的按正则校验（如 `url` 须 `http(s)://` 开头） | 错误 |
 | 标签 | ≥ 1；每个在 `tags.yml`；不重复 | 错误 |
 | 边 | `uses` / `patterns` / `related` 目标存在、类型合规、不自指、不重复 | 错误 |
 | 正文链接 | 相对路径目标存在；无 `[[wikilink]]`；图片在 `assets/`；无 `{{占位符}}` | 错误 |

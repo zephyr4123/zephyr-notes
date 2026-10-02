@@ -118,7 +118,8 @@
         },
         "url": {
           "kind": "string",
-          "required": false
+          "required": false,
+          "pattern": "^https?://"
         },
         "patterns": {
           "kind": "reflist",
@@ -166,6 +167,37 @@
         "例子"
       ]
     },
+    "source": {
+      "dir": "notes/source",
+      "fields": {
+        "format": {
+          "kind": "enum",
+          "required": true,
+          "values": [
+            "blog",
+            "paper",
+            "book",
+            "video",
+            "course",
+            "doc"
+          ]
+        },
+        "url": {
+          "kind": "string",
+          "required": true,
+          "pattern": "^https?://"
+        },
+        "author": {
+          "kind": "string",
+          "required": false
+        },
+        "published": {
+          "kind": "date",
+          "required": false
+        }
+      },
+      "required_headings": []
+    },
     "map": {
       "dir": "maps",
       "skip_common": [
@@ -211,7 +243,8 @@
       "case",
       "problem",
       "qa",
-      "pattern"
+      "pattern",
+      "source"
     ]
   }
 }
