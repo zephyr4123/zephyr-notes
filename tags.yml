@@ -16,6 +16,7 @@ nlp: 自然语言处理
 llm: 大语言模型与应用
 agent-engineering: Agent 工程：harness、工具、skill、评测与优化，让模型在应用里可靠干活的那一层
 evaluation: 评测设计与优化：评测集、打分器、爬山、防过拟合
+claude-code: Claude Code 的用法与扩展：skill、hook、plugin、mod
 data-analysis: 数据分析
 
 # —— 业务场景 ——
