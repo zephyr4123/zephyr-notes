@@ -1,7 +1,6 @@
 # ---- Claude Code / agent 本机私有文件（符号链接与会话配置，绝不进库）----
 .claude/
 CLAUDE.local.md
-AGENTS.md
 .codex/
 .ae/
 
